@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Control de Stock | Hamburgueseria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <main class="dashboard">
+      <section class="hero">
+        <div class="hero-content">
+          <div class="brand-lockup">
+            <img src="./assets/logo_bros.jpeg" alt="Logo Bro's Bruger y lomos" class="brand-logo" />
+            <span class="brand-name">BRO'S BRUGER Y LOMOS</span>
+          </div>
+          <p class="eyebrow">Panel de administracion</p>
+          <h1>Control de stock para hamburgueseria</h1>
+          <p class="hero-copy">
+            Registra insumos, ajusta cantidades en segundos y detecta faltantes antes de que impacten en la cocina.
+          </p>
+        </div>
+
+        <div class="hero-metrics" id="metrics">
+          <article>
+            <span>Total productos</span>
+            <strong id="total-products">0</strong>
+          </article>
+          <article>
+            <span>Stock bajo</span>
+            <strong id="low-stock-count">0</strong>
+          </article>
+          <article>
+            <span>Unidades totales</span>
+            <strong id="total-units">0</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="grid-layout">
+        <section class="panel panel-form">
+          <div class="panel-heading">
+            <h2 id="form-title">Agregar producto</h2>
+            <p>Carga nuevos insumos o actualiza uno existente.</p>
+          </div>
+
+          <details class="auth-box">
+            <summary>Autenticacion basica opcional</summary>
+            <div class="auth-fields">
+              <label>
+                Usuario API
+                <input id="api-user" placeholder="solo si activaste auth en el backend" />
+              </label>
+
+              <label>
+                Clave API
+                <input id="api-password" type="password" placeholder="solo si activaste auth en el backend" />
+              </label>
+            </div>
+          </details>
+
+          <form id="product-form">
+            <input type="hidden" id="product-id" />
+
+            <label>
+              Nombre
+              <input id="name" name="name" placeholder="Ej: Pan de hamburguesa" required />
+            </label>
+
+            <label>
+              Categoria
+              <select id="category" name="category" required>
+                <option value="">-- Selecciona una categoría --</option>
+                <option value="Gaseosa">Gaseosa</option>
+                <option value="Panes">Panes</option>
+                <option value="Verdura">Verdura</option>
+                <option value="Condimentos">Condimentos</option>
+                <option value="Carnes">Carnes</option>
+                <option value="Papas">Papas</option>
+                <option value="Cerveza">Cerveza</option>
+                <option value="Agua">Agua</option>
+                <option value="Agua saborizada">Agua saborizada</option>
+                <option value="Empanadas">Empanadas</option>
+                <option value="Fiambres">Fiambres</option>
+                <option value="Insumos">Insumos</option>
+              </select>
+            </label>
+
+            <div class="two-columns">
+              <label>
+                Stock actual
+                <input id="stock" name="stock" type="number" min="0" required />
+              </label>
+
+              <label>
+                Stock minimo
+                <input id="minimumStock" name="minimumStock" type="number" min="0" value="10" required />
+              </label>
+            </div>
+
+            <label>
+              Unidad
+              <input id="unit" name="unit" placeholder="Ej: unidades, kg, botellas" value="unidades" required />
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="button button-primary" id="submit-button">Guardar producto</button>
+              <button type="button" class="button button-secondary hidden" id="cancel-edit">Cancelar edicion</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel panel-table">
+          <div class="panel-heading panel-heading-inline">
+            <div>
+              <h2>Inventario actual</h2>
+              <p>Consulta y ajusta el stock en tiempo real.</p>
+            </div>
+
+            <button class="button button-secondary" id="refresh-button">Actualizar</button>
+          </div>
+
+          <div id="status-message" class="status-message" aria-live="polite"></div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Categoria</th>
+                  <th>Stock</th>
+                  <th>Minimo</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./config.js"></script>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>

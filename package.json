@@ -1,0 +1,15 @@
+{
+  "name": "control-stock-hamburgueseria",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de control de stock para una hamburgueseria con frontend y backend separados.",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npx serve frontend -l 5500\"",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npx serve frontend -l 5500"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "serve": "^14.2.4"
+  }
+}
