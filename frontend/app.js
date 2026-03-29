@@ -1,4 +1,7 @@
-const API_BASE_URL = window.APP_CONFIG?.apiBaseUrl || 'http://localhost:4000/api/products';
+const configuredApiBaseUrl = window.APP_CONFIG?.apiBaseUrl || 'http://localhost:4000/api';
+const API_BASE_URL = configuredApiBaseUrl.endsWith('/products')
+  ? configuredApiBaseUrl
+  : `${configuredApiBaseUrl.replace(/\/$/, '')}/products`;
 
 const elements = {
   form: document.querySelector('#product-form'),
