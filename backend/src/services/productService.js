@@ -1,4 +1,6 @@
 import { getFirestore } from '../config/firestore.js';
+import { sendStockAlert } from './emailService.js';
+import { shouldAlert } from '../config/stockThresholds.js';
 
 const COLLECTION_NAME = 'products';
 
@@ -80,8 +82,17 @@ export async function createProduct(payload) {
   });
 
   const savedProduct = await documentReference.get();
+  const product = mapProductDocument(savedProduct);
 
-  return mapProductDocument(savedProduct);
+  // Check if stock is below threshold and send alert
+  if (shouldAlert(product.category, product.stock)) {
+    const { getThreshold } = await import('../config/stockThresholds.js');
+    sendStockAlert(product.name, product.category, product.stock, getThreshold(product.category)).catch(err => {
+      console.error('Error sending stock alert:', err);
+    });
+  }
+
+  return product;
 }
 
 export async function updateProduct(productId, payload) {
@@ -102,7 +113,17 @@ export async function updateProduct(productId, payload) {
     updatedAt: new Date().toISOString()
   });
 
-  return mapProductDocument(await documentReference.get());
+  const updated = mapProductDocument(await documentReference.get());
+
+  // Check if stock is below threshold and send alert
+  if (shouldAlert(updated.category, updated.stock)) {
+    const { getThreshold } = await import('../config/stockThresholds.js');
+    sendStockAlert(updated.name, updated.category, updated.stock, getThreshold(updated.category)).catch(err => {
+      console.error('Error sending stock alert:', err);
+    });
+  }
+
+  return updated;
 }
 
 export async function adjustProductStock(productId, quantityChange) {
@@ -146,6 +167,14 @@ export async function adjustProductStock(productId, quantityChange) {
       updatedAt: new Date().toISOString()
     };
   });
+
+  // Check if stock is below threshold and send alert
+  if (shouldAlert(updatedProduct.category, updatedProduct.stock)) {
+    const { getThreshold } = await import('../config/stockThresholds.js');
+    sendStockAlert(updatedProduct.name, updatedProduct.category, updatedProduct.stock, getThreshold(updatedProduct.category)).catch(err => {
+      console.error('Error sending stock alert:', err);
+    });
+  }
 
   return updatedProduct;
 }

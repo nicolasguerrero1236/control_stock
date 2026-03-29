@@ -205,6 +205,48 @@ Cada producto tiene dos valores:
 
 En el frontend, si stock es menor que minimumStock, se muestra el estado Stock bajo. Esto te permite configurar distintos minimos segun el producto.
 
+## Alertas por email de stock bajo
+
+El backend envía automáticamente emails a inm.danielanocetti@gmail.com cuando el stock de un producto cae a ciertos umbrales por categoría:
+
+| Categoría | Umbral | Acción |
+|-----------|--------|--------|
+| Gaseosa | 6 unidades | Alerta cuando ≤ 6 |
+| Carnes | 20 unidades | Alerta cuando ≤ 20 |
+| Papas | 1 unidad | Alerta cuando ≤ 1 |
+| Insumos | 100 unidades | Alerta cuando ≤ 100 |
+| Panes | 20 unidades | Alerta cuando ≤ 20 |
+| Cerveza | 6 unidades | Alerta cuando ≤ 6 |
+| Agua | 6 unidades | Alerta cuando ≤ 6 |
+| Agua saborizada | 6 unidades | Alerta cuando ≤ 6 |
+| Empanadas | 4 unidades | Alerta cuando ≤ 4 |
+| Verdura | 10 unidades | Alerta cuando ≤ 10 |
+| Condimentos | 5 unidades | Alerta cuando ≤ 5 |
+| Fiambres | 15 unidades | Alerta cuando ≤ 15 |
+
+### Configurar emails
+
+1. En backend/.env configura:
+   - SMTP_HOST=smtp.gmail.com (o tu proveedor)
+   - SMTP_PORT=587
+   - SMTP_USER=tu-email@gmail.com
+   - SMTP_PASSWORD=tu-contraseña-app (usar contraseña de aplicación de Google)
+   - ALERT_EMAIL=inm.danielanocetti@gmail.com
+   - ENABLE_STOCK_ALERTS=true
+
+2. Si usas Gmail:
+   - Activa 2FA en tu cuenta Google
+   - Ve a myaccount.google.com/apppasswords
+   - Crea una contraseña de aplicación para "Correo" en "Otras"
+   - Usa esa contraseña en SMTP_PASSWORD
+
+3. Las alertas se envían automáticamente cuando:
+   - Creas un producto con stock ≤ al umbral
+   - Editas un producto y el stock queda ≤ al umbral
+   - Ajustas el stock con +1/-1 y baja ≤ al umbral
+
+4. Para desactivar: ENABLE_STOCK_ALERTS=false
+
 ## Autenticacion basica opcional
 
 Si quieres proteger la API:
