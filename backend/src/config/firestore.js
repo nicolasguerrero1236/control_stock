@@ -33,11 +33,7 @@ function getCredentialsFromServiceAccountFile() {
     );
   }
 
-  return {
-    projectId: parsedCredentials.project_id,
-    clientEmail: parsedCredentials.client_email,
-    privateKey: parsedCredentials.private_key
-  };
+  return parsedCredentials;
 }
 
 function getFirebaseCredentials() {
@@ -74,8 +70,10 @@ export function getFirestore() {
   }
 
   if (!admin.apps.length) {
+    const fileCredentials = getCredentialsFromServiceAccountFile();
+
     admin.initializeApp({
-      credential: admin.credential.cert(getFirebaseCredentials())
+      credential: admin.credential.cert(fileCredentials || getFirebaseCredentials())
     });
   }
 

@@ -3,15 +3,11 @@ const STOCK_THRESHOLDS = {
   'Gaseosa': 6,
   'Carnes': 20,
   'Papas': 1,
-  'Insumos': 100,
   'Panes': 20,
   'Cerveza': 6,
   'Agua': 6,
   'Agua saborizada': 6,
   'Empanadas': 4,
-  'Verdura': 10,
-  'Condimentos': 5,
-  'Fiambres': 15,
 };
 
 /**

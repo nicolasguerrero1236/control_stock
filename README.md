@@ -214,15 +214,11 @@ El backend envía automáticamente emails a inm.danielanocetti@gmail.com cuando 
 | Gaseosa | 6 unidades | Alerta cuando ≤ 6 |
 | Carnes | 20 unidades | Alerta cuando ≤ 20 |
 | Papas | 1 unidad | Alerta cuando ≤ 1 |
-| Insumos | 100 unidades | Alerta cuando ≤ 100 |
 | Panes | 20 unidades | Alerta cuando ≤ 20 |
 | Cerveza | 6 unidades | Alerta cuando ≤ 6 |
 | Agua | 6 unidades | Alerta cuando ≤ 6 |
 | Agua saborizada | 6 unidades | Alerta cuando ≤ 6 |
 | Empanadas | 4 unidades | Alerta cuando ≤ 4 |
-| Verdura | 10 unidades | Alerta cuando ≤ 10 |
-| Condimentos | 5 unidades | Alerta cuando ≤ 5 |
-| Fiambres | 15 unidades | Alerta cuando ≤ 15 |
 
 ### Configurar emails
 
