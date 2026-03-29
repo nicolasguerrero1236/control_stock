@@ -3,6 +3,7 @@
   --bg-dark: #1a1a2e;
   --text-light: #ffffff;
   --text-dark: #1a1a1a;
+  --gray: #4a5568;
   --red-vibrant: #d84848;
   --red-hot: #c63636;
   --red-light: #f5e5e5;
@@ -378,6 +379,11 @@ select option:hover {
 .status-message {
   min-height: 24px;
   margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(74, 85, 104, 0.25);
+  color: #2d3748;
   font-size: 0.77rem;
   letter-spacing: 0.06em;
   font-weight: 700;
