@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 // Configure email transporter
 let transporter = null;
@@ -131,7 +131,7 @@ async function testEmailConfiguration() {
   }
 }
 
-module.exports = {
+export {
   initializeMailer,
   sendStockAlert,
   testEmailConfiguration,

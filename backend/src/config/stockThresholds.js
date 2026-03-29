@@ -35,7 +35,7 @@ function shouldAlert(category, stock) {
   return stock <= threshold;
 }
 
-module.exports = {
+export {
   STOCK_THRESHOLDS,
   getThreshold,
   shouldAlert,
