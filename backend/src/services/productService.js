@@ -1,6 +1,6 @@
 import { getFirestore } from '../config/firestore.js';
 import { sendStockAlert } from './emailService.js';
-import { shouldAlert } from '../config/stockThresholds.js';
+import { getThreshold, shouldAlert } from '../config/stockThresholds.js';
 
 const COLLECTION_NAME = 'products';
 
@@ -14,8 +14,37 @@ function mapProductDocument(documentSnapshot) {
     stock: data.stock,
     minimumStock: data.minimumStock,
     unit: data.unit,
+    lowStockAlertSent: Boolean(data.lowStockAlertSent),
     updatedAt: data.updatedAt
   };
+}
+
+async function syncLowStockAlert(documentReference, product) {
+  const isCriticalStock = shouldAlert(product.category, product.stock);
+  const alertAlreadySent = Boolean(product.lowStockAlertSent);
+
+  if (!isCriticalStock) {
+    if (alertAlreadySent) {
+      await documentReference.update({ lowStockAlertSent: false });
+      return { ...product, lowStockAlertSent: false };
+    }
+
+    return product;
+  }
+
+  if (alertAlreadySent) {
+    return product;
+  }
+
+  const threshold = getThreshold(product.category);
+  const alertSent = await sendStockAlert(product.name, product.category, product.stock, threshold);
+
+  if (alertSent) {
+    await documentReference.update({ lowStockAlertSent: true });
+    return { ...product, lowStockAlertSent: true };
+  }
+
+  return product;
 }
 
 function validateProductPayload(payload, { partial = false } = {}) {
@@ -78,21 +107,14 @@ export async function createProduct(payload) {
   const validatedProduct = validateProductPayload(payload);
   const documentReference = await firestore.collection(COLLECTION_NAME).add({
     ...validatedProduct,
+    lowStockAlertSent: false,
     updatedAt: new Date().toISOString()
   });
 
   const savedProduct = await documentReference.get();
   const product = mapProductDocument(savedProduct);
 
-  // Check if stock is below threshold and send alert
-  if (shouldAlert(product.category, product.stock)) {
-    const { getThreshold } = await import('../config/stockThresholds.js');
-    sendStockAlert(product.name, product.category, product.stock, getThreshold(product.category)).catch(err => {
-      console.error('Error sending stock alert:', err);
-    });
-  }
-
-  return product;
+  return syncLowStockAlert(documentReference, product);
 }
 
 export async function updateProduct(productId, payload) {
@@ -115,15 +137,7 @@ export async function updateProduct(productId, payload) {
 
   const updated = mapProductDocument(await documentReference.get());
 
-  // Check if stock is below threshold and send alert
-  if (shouldAlert(updated.category, updated.stock)) {
-    const { getThreshold } = await import('../config/stockThresholds.js');
-    sendStockAlert(updated.name, updated.category, updated.stock, getThreshold(updated.category)).catch(err => {
-      console.error('Error sending stock alert:', err);
-    });
-  }
-
-  return updated;
+  return syncLowStockAlert(documentReference, updated);
 }
 
 export async function adjustProductStock(productId, quantityChange) {
@@ -137,7 +151,7 @@ export async function adjustProductStock(productId, quantityChange) {
   const documentReference = firestore.collection(COLLECTION_NAME).doc(productId);
 
   // Se usa una transaccion para evitar inconsistencias si varios dispositivos modifican el mismo producto al mismo tiempo.
-  const updatedProduct = await firestore.runTransaction(async (transaction) => {
+  const transactionResult = await firestore.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(documentReference);
 
     if (!snapshot.exists) {
@@ -148,6 +162,9 @@ export async function adjustProductStock(productId, quantityChange) {
 
     const product = snapshot.data();
     const nextStock = product.stock + quantityChange;
+    const nextLowStockAlertSent = shouldAlert(product.category, nextStock)
+      ? Boolean(product.lowStockAlertSent)
+      : false;
 
     if (nextStock < 0) {
       const error = new Error('La operacion dejaria el stock en un valor negativo.');
@@ -157,23 +174,37 @@ export async function adjustProductStock(productId, quantityChange) {
 
     transaction.update(documentReference, {
       stock: nextStock,
+      lowStockAlertSent: nextLowStockAlertSent,
       updatedAt: new Date().toISOString()
     });
 
     return {
-      id: snapshot.id,
-      ...product,
-      stock: nextStock,
-      updatedAt: new Date().toISOString()
+      product: {
+        id: snapshot.id,
+        ...product,
+        stock: nextStock,
+        lowStockAlertSent: nextLowStockAlertSent,
+        updatedAt: new Date().toISOString()
+      },
+      shouldSendAlert: shouldAlert(product.category, nextStock) && !Boolean(product.lowStockAlertSent)
     };
   });
 
-  // Check if stock is below threshold and send alert
-  if (shouldAlert(updatedProduct.category, updatedProduct.stock)) {
-    const { getThreshold } = await import('../config/stockThresholds.js');
-    sendStockAlert(updatedProduct.name, updatedProduct.category, updatedProduct.stock, getThreshold(updatedProduct.category)).catch(err => {
-      console.error('Error sending stock alert:', err);
-    });
+  let updatedProduct = transactionResult.product;
+
+  if (transactionResult.shouldSendAlert) {
+    const threshold = getThreshold(updatedProduct.category);
+    const alertSent = await sendStockAlert(
+      updatedProduct.name,
+      updatedProduct.category,
+      updatedProduct.stock,
+      threshold
+    );
+
+    if (alertSent) {
+      await documentReference.update({ lowStockAlertSent: true });
+      updatedProduct = { ...updatedProduct, lowStockAlertSent: true };
+    }
   }
 
   return updatedProduct;
